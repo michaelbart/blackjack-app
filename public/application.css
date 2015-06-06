@@ -24,6 +24,7 @@ div.navbar {
 
 form#hit, form#stay {
   display: inline-block;
+  margin-bottom: 100px;
 }
 
 form#stay {
