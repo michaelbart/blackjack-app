@@ -1,3 +1,5 @@
+<div id="game">
+
 <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="nav_container">
@@ -10,7 +12,7 @@
 
 <h1>Blackjack</h1>
 
-<!-- <p>Welcome <%= session[:player_name].capitalize%>!</p> -->
+
 <div class="message">
     <%if @error %>
       <div class="alert alert-error"><%=@error%></div>
@@ -22,11 +24,11 @@
 <% if @play_again %>
   <p>
     <strong>Play again?</strong>
-    <a href="/game" class="btn btn-primary">Yes</a>
+    <a href="/bet" class="btn btn-primary">Yes</a>
     <a href="/game_over" class="btn">No</a>
   </p>
 <% end %>
-<div class="well">
+<div id="dealer_well"class="well">
   <h4>Dealer's cards:</h4>
   <% session[:dealer_cards].each_with_index do |card, i| %>
     <% if session[:turn] != "dealer" && i == 0 %>
@@ -56,7 +58,12 @@
 </div>
 <p>
 <% if @show_buttons %>
+<h4>
   What would <%= session[:player_name].capitalize%> like to do?
+  </br>
+    <small><%= session[:player_name].capitalize%> has <strong>$<%= session[:money]%></strong> total.
+    Bet amount this round: <strong>$<%=session[:bet]%></strong></small>
+</h4>
 <% end %>
 </p>
 
@@ -68,3 +75,4 @@
     <input type="submit" value="Stay" class="btn btn-danger"/>
   </form>
 <% end %>
+</div>

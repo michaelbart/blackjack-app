@@ -40,19 +40,24 @@ helpers do
   def winner!(msg)
     @play_again = true
     @show_buttons = false
-    @success = "<strong>#{session[:player_name].capitalize} wins!</strong> #{msg}"
+    session[:money] += session[:bet]
+    @success = "<strong>#{session[:player_name].capitalize} wins!</strong> #{msg}.</br>#{session[:player_name].capitalize} now has <strong>$#{session[:money]}</strong>"
   end
 
   def loser!(msg)
     @play_again = true
     @show_buttons = false
-    @error = "<strong>#{session[:player_name].capitalize} loses.</strong> #{msg}"
+    session[:money] -= session[:bet]
+    if session[:money] < 0
+      session[:money] = 0
+    end
+    @error = "<strong>Dealer wins.</strong> #{msg}.</br>#{session[:player_name].capitalize} now has <strong>$#{session[:money]}</strong>"
   end
 
   def tie!(msg)
     @play_again = true
     @show_buttons = false
-    @success = "<strong>It's a tie!</strong> #{msg}"
+    @success = "<strong>It's a tie!</strong> #{msg}.</br>#{session[:player_name].capitalize} has <strong>$#{session[:money]}</strong>"
   end
 
 end
@@ -61,7 +66,7 @@ before do
   @show_buttons = true
 end
 
-get '/casino' do
+get '/' do
   session.clear
   erb :casino #, :layout => :layout
 end
@@ -76,16 +81,39 @@ get '/blackjack' do
 end
 
 get '/new_player' do
+  session.clear
   erb :new_player, :layout => :new_player
 end
 
 post '/new_player' do
-
   if params[:player_name].empty?
     @error = "Name is required"
     halt erb :new_player, :layout => :new_player
   end
   session[:player_name] = params[:player_name]
+  session[:money] = 500
+  redirect '/bet'
+end
+
+get '/bet' do
+  @has_bet = false
+  if session[:money] == 0
+    redirect '/game_over'
+  end
+  erb :bet, :layout => :bet
+end
+
+post '/bet' do
+  session[:bet] = params[:bet].to_i
+  if session[:bet] > session[:money]
+    @error = "You don't have that much money."
+    @has_bet = true
+    halt erb :bet, :layout => :bet
+  elsif session[:bet] == 0
+    @error = "Must place a bet."
+    @has_bet = true
+    halt erb :bet, :layout => :bet
+  end
   redirect '/game'
 end
 
@@ -107,6 +135,11 @@ get '/game' do
   session[:player_cards].each do |card|
     display_card(card)
   end
+  
+  player_total = calculate_total(session[:player_cards])
+  if player_total == 21
+    winner!("#{session[:player_name].capitalize} hit blackjack")
+  end
   erb :game
 end
 
@@ -115,11 +148,11 @@ post '/game/player/hit' do
 
   player_total = calculate_total(session[:player_cards])
   if player_total == 21
-    winner!("#{session[:player_name].capitalize} hit blackjack.")
+    winner!("#{session[:player_name].capitalize} hit blackjack")
   elsif player_total > 21
-    loser!("Bust! #{session[:player_name].capitalize} went over 21.")
+    loser!("#{session[:player_name].capitalize} went over 21")
   end
-  erb :game # reload the template
+  erb :game, layout: false # reload the template
 end
 
 post '/game/player/stay' do
@@ -135,10 +168,10 @@ get '/game/dealer' do
   dealer_total = calculate_total(session[:dealer_cards])
 
   if dealer_total == 21
-    loser!("The dealer hit blackjack.")
+    loser!("The dealer hit blackjack")
     @show_total = true
   elsif dealer_total > 21
-    winner!("Bust! The dealer went over 21.")
+    winner!("The dealer went over 21")
     @show_total = true
   elsif dealer_total >= 17
     # dealer stays
@@ -166,7 +199,7 @@ get '/game/compare' do
   elsif player_total > dealer_total
     winner!("#{session[:player_name].capitalize} stayed at #{player_total}, and the dealer stayed at #{dealer_total}")
   else
-    tie!("Both #{session[:player_name].capitalize} and the dealer stayed at #{player_total}.")
+    tie!("Both #{session[:player_name].capitalize} and the dealer stayed at #{player_total}")
   end
   erb :game
 

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blackjack</title>
+    <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/application.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="/application.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h4>Would you like to place a bet this round?</h4>
+      You currently have $<%= session[:money] %>.
+      <div class="message">
+      <%if @error %>
+        <div class="alert alert-error"><%=@error%></div>
+      <% end %>
+      </div>
+      <% if @has_bet == false %>
+        <div id="place_bet"class="btn btn-primary noselect">
+          Yes, let me place a bet!
+        </div>
+        </br>
+        <form id="no_bet" action="/" method="get">
+          <input type="submit" value="No, take my money and run!" class="btn btn-danger">
+        </form>
+        
+        <form class="hidden" id="bet"action='/bet' method='post'>
+          </br>
+          Bet: $<input type="number" name="bet" />
+          <br/>
+          <input type="submit" class="btn btn-success" />
+        </form>
+        
+      <% else %>
+        <form id="bet"action='/bet' method='post'>
+          </br>
+          Bet: $<input type="number" name="bet" />
+          <br/>
+          <input type="submit" class="btn btn-success" />
+        </form>
+      <% end %>
+    </div>
+  </body>
+</html>
