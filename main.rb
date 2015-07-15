@@ -68,7 +68,7 @@ end
 
 get '/' do
   session.clear
-  erb :casino #, :layout => :layout
+  erb :lobby #, :layout => :layout
 end
 
 get '/blackjack' do 
